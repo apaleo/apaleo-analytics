@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env*
+coverage/
+
+# OS junk
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
