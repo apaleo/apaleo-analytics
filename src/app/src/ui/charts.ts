@@ -18,4 +18,4 @@ export const CHARTS = [
 
 export type ChartId = (typeof CHARTS)[number]['id']
 
-export const DEFAULT_CHART_ID: ChartId = 'aging-wip'
+export const DEFAULT_CHART_ID: ChartId = 'dashboard'

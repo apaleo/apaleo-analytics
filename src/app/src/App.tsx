@@ -96,7 +96,7 @@ function AnalyticsScreen({
   const switchGeneration = useRef(0)
   const refreshAbort = useRef<AbortController | null>(null)
   const [dataset, setDataset] = useState<Dataset>(() => loadExampleDataset())
-  const [chartId, setChartId] = useState<ChartId>(() => readPreferences().chartId ?? DEFAULT_CHART_ID)
+  const [chartId, setChartId] = useState<ChartId>(DEFAULT_CHART_ID)
   const [filters, setFilters] = useState<FilterState>(() => defaultFilterState(loadExampleDataset()))
   const [filtersOpen, setFiltersOpen] = useState(true)
   const [includeSubIssues, setIncludeSubIssues] = useState(() => readPreferences().includeSubIssues === true)

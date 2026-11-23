@@ -3,7 +3,7 @@ import { CHARTS, DEFAULT_CHART_ID } from './charts.ts'
 import { messages } from './i18n.tsx'
 
 describe('analytics chrome catalog', () => {
-  it('lists the thirteen views and opens Aging Work In Progress', () => {
+  it('lists the thirteen views and opens Dashboard', () => {
     expect(CHARTS.map((chart) => chart.id)).toEqual([
       'dashboard',
       'cycle-time-scatterplot',
@@ -19,7 +19,7 @@ describe('analytics chrome catalog', () => {
       'wip-run',
       'source-data',
     ])
-    expect(DEFAULT_CHART_ID).toBe('aging-wip')
+    expect(DEFAULT_CHART_ID).toBe('dashboard')
     expect(CHARTS.map((chart) => messages.en[chart.labelKey])).toEqual([
       'Dashboard',
       'Cycle Time Scatterplot',
