@@ -23,6 +23,8 @@ export interface WorkflowBounds {
 export interface CompletedItem {
   id: string
   title?: string
+  /** Same stored URL Source data uses. Absent when the item has no link. */
+  link?: string
   completedOn: string
   completedDay: number
   cycleTimeDays: number
@@ -142,6 +144,7 @@ export function completedItems(
     completed.push({
       id: item.id,
       title: item.title,
+      link: item.link,
       completedOn: formatIsoDate(done),
       completedDay: calendarDayNumber(done),
       cycleTimeDays,

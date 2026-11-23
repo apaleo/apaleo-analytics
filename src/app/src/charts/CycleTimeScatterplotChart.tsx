@@ -1,5 +1,14 @@
 import { useState } from 'react'
-import { CartesianGrid, ComposedChart, Line, ReferenceLine, Scatter, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  Scatter,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import type { WorkItem, WorkflowStage } from '../domain/types.ts'
 import type { MessageKey } from '../ui/i18n.tsx'
 import { useI18n } from '../ui/i18n.tsx'
@@ -15,6 +24,7 @@ import {
 import { AXIS_TICK, CHART_MARGIN, percentileColor, TIP_WRAPPER } from './chartTheme.ts'
 import { ChartFrame } from './ChartFrame.tsx'
 import { projectCycleTimeScatter, projectCycleTimeTrend, type CycleTimeTrendPoint } from './cycleTimeScatter.ts'
+import { onScatterDotClick } from './scatterLink.ts'
 import { formatDayTick, type CompletedItem } from './metrics.ts'
 import { type ChartTipProps } from './tips.tsx'
 import { axisTop, fill, formatDays, percentileSentence } from './text.ts'
@@ -109,7 +119,11 @@ export function CycleTimeScatterplotChart({
             tick={AXIS_TICK}
             stroke="var(--aa-border)"
           />
-          <Tooltip content={(props) => renderCycleTip(props, t)} cursor={{ stroke: 'var(--aa-muted)' }} wrapperStyle={TIP_WRAPPER} />
+          <Tooltip
+            content={(props) => renderCycleTip(props, t)}
+            cursor={{ stroke: 'var(--aa-muted)' }}
+            wrapperStyle={{ ...TIP_WRAPPER, pointerEvents: 'none' }}
+          />
           {series.percentiles.map((level) => (
             <ReferenceLine
               key={level.percentile}
@@ -124,7 +138,13 @@ export function CycleTimeScatterplotChart({
               }}
             />
           ))}
-          <Scatter data={series.points} dataKey="cycleTimeDays" fill="var(--aa-accent)" isAnimationActive={false} />
+          <Scatter
+            data={series.points}
+            dataKey="cycleTimeDays"
+            fill="var(--aa-accent)"
+            isAnimationActive={false}
+            onClick={onScatterDotClick}
+          />
           {warmup.length > 0 ? <TrendLine points={warmup} opacity={0.4} /> : null}
           {solid.length > 0 ? <TrendLine points={solid} opacity={1} /> : null}
         </ComposedChart>
