@@ -9,6 +9,47 @@ export interface CumulativeFlowSeries {
   points: { date: string; values: number[] }[]
 }
 
+/** Visual top-to-bottom band order for the named workflow states. */
+const CFD_STACK_RANKS = ['new', 'planned', 'in progress', 'in review', 'merged', 'done'] as const
+
+function stageRank(name: string, exactMergedPresent: boolean): number | undefined {
+  const normalized = name.trim().toLowerCase().replace(/\s+/g, ' ')
+  if (normalized === 'merged') return CFD_STACK_RANKS.indexOf('merged')
+  if (normalized.startsWith('merged')) {
+    return exactMergedPresent ? undefined : CFD_STACK_RANKS.indexOf('merged')
+  }
+  const rank = CFD_STACK_RANKS.indexOf(normalized as (typeof CFD_STACK_RANKS)[number])
+  return rank >= 0 ? rank : undefined
+}
+
+/**
+ * Band order from the top of the stack to the bottom.
+ * Named states stay in New → Done order. Other stages keep their workflow positions.
+ * A longer "Merged…" name is the Merged band only when the board has no exact Merged stage.
+ * Recharts paints the first stacked area at the bottom, so the chart draws this list in reverse.
+ */
+export function cfdStackTopToBottom<T extends { name: string }>(stages: readonly T[]): T[] {
+  const exactMergedPresent = stages.some((stage) => stage.name.trim().toLowerCase() === 'merged')
+  const ranked = stages.map((stage, index) => ({
+    stage,
+    index,
+    rank: stageRank(stage.name, exactMergedPresent),
+  }))
+  const named = ranked
+    .filter((entry) => entry.rank !== undefined)
+    .sort((a, b) => a.rank! - b.rank! || a.index - b.index)
+  const ordered: T[] = []
+  let namedIndex = 0
+  for (const entry of ranked) {
+    if (entry.rank === undefined) ordered.push(entry.stage)
+    else {
+      ordered.push(named[namedIndex]!.stage)
+      namedIndex += 1
+    }
+  }
+  return ordered
+}
+
 const RANGE_MONTHS: Record<Exclude<CfdTimeRange, 'all'>, number> = {
   '1m': 1,
   '3m': 3,

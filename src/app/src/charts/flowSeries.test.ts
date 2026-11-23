@@ -4,7 +4,7 @@ import { calendarDayNumber } from '../domain/dates.ts'
 import type { Dataset, WorkItem, WorkflowStage } from '../domain/types.ts'
 import { applyFilterState } from '../ui/filters/filterState.ts'
 import { projectAgingWip } from './agingWip.ts'
-import { cfdWindowStart, projectCumulativeFlow } from './cumulativeFlow.ts'
+import { cfdStackTopToBottom, cfdWindowStart, projectCumulativeFlow } from './cumulativeFlow.ts'
 import { projectCycleTimeHistogram } from './cycleTimeHistogram.ts'
 import { projectCycleTimeScatter, projectCycleTimeTrend } from './cycleTimeScatter.ts'
 import type { CompletedItem } from './metrics.ts'
@@ -240,6 +240,38 @@ describe('throughput histogram', () => {
 })
 
 describe('cumulative flow', () => {
+  it('orders the stacked areas top-to-bottom as New, Planned, In Progress, In Review, Merged, Done', () => {
+    const stages = ['New', 'Planned', 'In Progress', 'In Review', 'Merged', 'Done'].map((name) => ({ name }))
+    expect(cfdStackTopToBottom(stages).map((stage) => stage.name)).toEqual([
+      'New',
+      'Planned',
+      'In Progress',
+      'In Review',
+      'Merged',
+      'Done',
+    ])
+  })
+
+  it('treats a Merged-prefixed stage as Merged and keeps other stages in workflow position', () => {
+    const stages = ['New', 'Blocked', 'Merged / In Acceptance', 'Done'].map((name) => ({ name }))
+    expect(cfdStackTopToBottom(stages).map((stage) => stage.name)).toEqual([
+      'New',
+      'Blocked',
+      'Merged / In Acceptance',
+      'Done',
+    ])
+  })
+
+  it('uses the exact Merged stage when a longer Merged name is also present', () => {
+    const stages = ['New', 'Merged / In Acceptance', 'Done', 'Merged'].map((name) => ({ name }))
+    expect(cfdStackTopToBottom(stages).map((stage) => stage.name)).toEqual([
+      'New',
+      'Merged / In Acceptance',
+      'Merged',
+      'Done',
+    ])
+  })
+
   it('stacks the stage an item occupied at the end of each day', () => {
     const items = [
       workItem('a', [new Date(2026, 0, 1), new Date(2026, 0, 3)]),

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   CartesianGrid,
   ComposedChart,
@@ -26,8 +26,9 @@ import { ChartFrame } from './ChartFrame.tsx'
 import { projectCycleTimeScatter, projectCycleTimeTrend, type CycleTimeTrendPoint } from './cycleTimeScatter.ts'
 import { onScatterDotClick } from './scatterLink.ts'
 import { formatDayTick, type CompletedItem } from './metrics.ts'
+import { workflowStageDays, type StageDayCount } from './stageAging.ts'
 import { type ChartTipProps } from './tips.tsx'
-import { axisTop, fill, formatDays, percentileSentence } from './text.ts'
+import { axisTop, cycleTimeTipLines, fill, formatDays, percentileSentence } from './text.ts'
 import { useAsOf } from './useAsOf.ts'
 
 export function CycleTimeScatterplotChart({
@@ -41,6 +42,11 @@ export function CycleTimeScatterplotChart({
 }) {
   const { t } = useI18n()
   const when = useAsOf(asOf)
+  const stageDays = useMemo(() => {
+    const byId = new Map<string, StageDayCount[]>()
+    for (const item of items) byId.set(item.id, workflowStageDays(item, stages))
+    return byId
+  }, [items, stages])
   const [showTrend, setShowTrend] = useState(() => readPreferences().scatterShowTrend ?? false)
   const [trendPercent, setTrendPercent] = useState<ScatterTrendPercentile>(
     () => readPreferences().scatterTrendPercentile ?? DEFAULT_SCATTER_TREND_PERCENTILE,
@@ -120,7 +126,7 @@ export function CycleTimeScatterplotChart({
             stroke="var(--aa-border)"
           />
           <Tooltip
-            content={(props) => renderCycleTip(props, t)}
+            content={(props) => renderCycleTip(props, t, stageDays)}
             cursor={{ stroke: 'var(--aa-muted)' }}
             wrapperStyle={{ ...TIP_WRAPPER, pointerEvents: 'none' }}
           />
@@ -242,18 +248,21 @@ function dayDomain(days: readonly number[]): [number, number] {
   return [min - pad, max + pad]
 }
 
-function renderCycleTip(props: ChartTipProps, t: (key: MessageKey) => string) {
+function renderCycleTip(
+  props: ChartTipProps,
+  translate: (key: MessageKey) => string,
+  stageDays: ReadonlyMap<string, readonly StageDayCount[]>,
+) {
   if (!props.active) return null
   const point = completedPoint(props.payload)
   if (point === undefined) return null
+  const stages = stageDays.get(point.id) ?? []
+  const lines = cycleTimeTipLines(point.cycleTimeDays, stages, translate)
   return (
-    <div className="chart-tip">
-      <p className="chart-tip__title">{point.id}</p>
-      {point.title === undefined ? null : <p>{point.title}</p>}
-      <p>{point.completedOn}</p>
-      <p>
-        {point.cycleTimeDays} {t('dayUnit')}
-      </p>
+    <div className="chart-tip" style={{ pointerEvents: 'none' }}>
+      {lines.map((line, index) => (
+        <p key={index}>{line}</p>
+      ))}
     </div>
   )
 }

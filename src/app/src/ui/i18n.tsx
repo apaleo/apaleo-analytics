@@ -73,6 +73,7 @@ const en = {
   completedCount: '{0} completed items.',
   cycleTimeHint:
     'Cycle time is the inclusive day count from the first workflow stage through the last stage.',
+  scatterTotalAge: 'Total Age',
   trendTitle: 'Cycle Time Trend',
   trendShow: 'Show Trend Line',
   trendPercentile: 'Percentile',
@@ -83,7 +84,7 @@ const en = {
   throughputSummary: '{0} completed items across {1} weeks.',
   throughputHint:
     'Bars count how many weeks finished that many items. Empty weeks inside the span count as zero.',
-  cfdSummary: 'Each band is how many items were in that stage. Earlier stages sit lower in the stack.',
+  cfdSummary: 'Each band is how many items were in that stage. Earlier stages sit higher in the stack.',
   cfdDateRange: 'Date range',
   cfdRange1m: 'Last 1 month',
   cfdRange3m: 'Last 3 months',
@@ -102,6 +103,7 @@ const en = {
   axisItems: 'Items',
   stageAge: 'In this stage: {0} days',
   dayUnit: 'days',
+  daySingular: 'day',
   cycleBin: '{0} items finished in {1} days',
   throughputBin: '{0} weeks finished {1} items',
   throughputRunSummary: '{0} completed items across {1} days. Average {2} per day.',

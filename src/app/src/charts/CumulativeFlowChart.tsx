@@ -12,7 +12,7 @@ import {
 } from '../persistence/preferences.ts'
 import { AXIS_TICK, CHART_MARGIN, stageColor, TIP_WRAPPER } from './chartTheme.ts'
 import { ChartFrame, SwatchLegend } from './ChartFrame.tsx'
-import { projectCumulativeFlow } from './cumulativeFlow.ts'
+import { cfdStackTopToBottom, projectCumulativeFlow } from './cumulativeFlow.ts'
 import { formatShortIso } from './metrics.ts'
 import type { ChartTipProps } from './tips.tsx'
 import { fill } from './text.ts'
@@ -39,6 +39,7 @@ export function CumulativeFlowChart({
   const when = useAsOf(asOf)
   const [range, setRange] = useState<CfdTimeRange>(() => readPreferences().cfdTimeRange ?? 'all')
   const series = projectCumulativeFlow(items, stages, when, range)
+  const stackTopToBottom = cfdStackTopToBottom(series.stages)
   const empty = series.points.length > 0 ? undefined : t(items.length === 0 ? 'noItems' : 'noCompletedItems')
   const rows = series.points.map((point) => {
     const row: Record<string, string | number> = { date: point.date }
@@ -84,9 +85,11 @@ export function CumulativeFlowChart({
       legend={
         <SwatchLegend
           shape="square"
-          items={series.stages
-            .map((stage, index) => ({ key: stage.key, label: stage.name, color: stageColor(index) }))
-            .reverse()}
+          items={stackTopToBottom.map((stage) => ({
+            key: stage.key,
+            label: stage.name,
+            color: stageColor(series.stages.findIndex((candidate) => candidate.key === stage.key)),
+          }))}
         />
       }
     >
@@ -102,19 +105,22 @@ export function CumulativeFlowChart({
           />
           <YAxis allowDecimals={false} width={44} tick={AXIS_TICK} stroke="var(--aa-border)" />
           <Tooltip content={(props) => renderFlowTip(props)} wrapperStyle={TIP_WRAPPER} />
-          {series.stages.map((stage, index) => (
-            <Area
-              key={stage.key}
-              type="stepAfter"
-              dataKey={stage.key}
-              name={stage.name}
-              stackId="flow"
-              stroke={stageColor(index)}
-              fill={stageColor(index)}
-              fillOpacity={0.82}
-              isAnimationActive={false}
-            />
-          ))}
+          {[...stackTopToBottom].reverse().map((stage) => {
+            const color = stageColor(series.stages.findIndex((candidate) => candidate.key === stage.key))
+            return (
+              <Area
+                key={stage.key}
+                type="stepAfter"
+                dataKey={stage.key}
+                name={stage.name}
+                stackId="flow"
+                stroke={color}
+                fill={color}
+                fillOpacity={0.82}
+                isAnimationActive={false}
+              />
+            )
+          })}
         </AreaChart>
       ) : undefined}
     </ChartFrame>
