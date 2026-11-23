@@ -4,7 +4,7 @@ React port of ActionableAgile Analytics. The app lives in `src/app` (Vite, React
 
 ## Live app
 
-Open [https://reimagined-bassoon-8lv263k.pages.github.io/](https://reimagined-bassoon-8lv263k.pages.github.io/). The repository is private, so GitHub asks you to sign in with an account that can read it. [https://apaleo.github.io/linear-analytics/](https://apaleo.github.io/linear-analytics/) redirects to that same site. The app opens on Dashboard.
+Open [https://apaleo.github.io/apaleo-analytics/](https://apaleo.github.io/apaleo-analytics/). The app opens on Dashboard.
 
 ## Linear
 
